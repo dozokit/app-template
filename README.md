@@ -4,7 +4,7 @@ A starting point for a real app on your own free Cloudflare account: React + Vit
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/dozokit/app-template)
 
-The button copies this repo into your GitHub, creates the database and puts the app online. It asks for `BETTER_AUTH_SECRET` (any random string of 32+ characters, for example from `openssl rand -base64 32`).
+The button copies this repo into your GitHub, creates the database and puts the app online. It asks for `BETTER_AUTH_SECRET` (any random string of 32+ characters, for example from `openssl rand -base64 32`) and `OWNER_EMAIL` (your email: that account becomes the app's owner once you confirm the email).
 
 ## Run it on your computer
 

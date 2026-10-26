@@ -1,5 +1,7 @@
 # Random string, at least 32 characters: openssl rand -base64 32
 BETTER_AUTH_SECRET=
-# Optional. Without it, password reset emails are printed in the Worker log.
+# Your email: its account becomes the app's owner once the email is confirmed.
+OWNER_EMAIL=
+# Optional. Without it, emails (confirmation, password reset) are printed in the Worker log.
 RESEND_API_KEY=
 EMAIL_FROM=
