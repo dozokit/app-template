@@ -104,7 +104,7 @@ export function checkRoutes(files, publicRoutes) {
   return { errors: [...new Set(errors)], routes: [...routes] };
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.url === `file://${globalThis.process?.argv?.[1]}`) {
   const { readFileSync, readdirSync } = await import("node:fs");
   const files = Object.fromEntries(
     readdirSync("worker", { recursive: true }).filter((f) => f.endsWith(".ts")).map((f) => [`worker/${f}`, readFileSync(`worker/${f}`, "utf8")]),

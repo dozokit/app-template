@@ -9,7 +9,9 @@ if (!branch || branch === "main") process.exit(0);
 
 const run = (cmd) => execSync(`npx wrangler ${cmd}`, { encoding: "utf8", stdio: ["ignore", "pipe", "inherit"] });
 const config = readFileSync("wrangler.jsonc", "utf8");
-const name = config.match(/"previews"[\s\S]*?"database_name":\s*"([^"]+)"/)[1];
+// Named after the Worker, so two apps on one account never share it.
+const placeholder = config.match(/"previews"[\s\S]*?"database_name":\s*"([^"]+)"/)[1];
+const name = `${config.match(/"name":\s*"([^"]+)"/)[1]}-preview-db`;
 const find = () => JSON.parse(run("d1 list --json")).find((d) => d.name === name);
 
 let db = find();
@@ -17,7 +19,7 @@ if (!db) {
   run(`d1 create ${name} --config /dev/null`);
   db = find();
 }
-writeFileSync("wrangler.jsonc", config.replace(`"database_name": "${name}"`, `"database_name": "${name}", "database_id": "${db.uuid}"`));
+writeFileSync("wrangler.jsonc", config.replace(`"database_name": "${placeholder}"`, `"database_name": "${name}", "database_id": "${db.uuid}"`));
 writeFileSync(
   ".preview-migrations.json",
   JSON.stringify({ name: "preview-migrations", d1_databases: [{ binding: "DB", database_name: name, database_id: db.uuid, migrations_dir: "migrations" }] }),
