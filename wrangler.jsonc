@@ -1,0 +1,16 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "dozokit-app",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+  // No database_id: the Deploy to Cloudflare button creates the database.
+  "d1_databases": [
+    { "binding": "DB", "database_name": "dozokit-app-db", "migrations_dir": "migrations" }
+  ]
+}

@@ -1,0 +1,5 @@
+# Random string, at least 32 characters: openssl rand -base64 32
+BETTER_AUTH_SECRET=
+# Optional. Without it, password reset emails are printed in the Worker log.
+RESEND_API_KEY=
+EMAIL_FROM=
