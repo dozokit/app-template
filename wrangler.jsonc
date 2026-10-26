@@ -12,5 +12,14 @@
   // No database_id: the Deploy to Cloudflare button creates the database.
   "d1_databases": [
     { "binding": "DB", "database_name": "dozokit-app-db", "migrations_dir": "migrations" }
-  ]
+  ],
+  // Draft previews (any branch but main) get their own database, never the live one.
+  // scripts/preview-db.mjs creates it in Cloudflare's build and fills in its id.
+  "previews": {
+    "d1_databases": [
+      { "binding": "DB", "database_name": "dozokit-app-preview-db", "migrations_dir": "migrations" }
+    ]
+  },
+  // Workers Logs: shows each request's CPU time in the dashboard.
+  "observability": { "enabled": true }
 }

@@ -10,7 +10,8 @@ A React + Vite app on Cloudflare Workers, with a D1 database and Better Auth log
 - `worker/auth.ts`: Better Auth setup and `requireUser()`.
 - `migrations/`: D1 migrations, applied in order.
 - `public-routes.json`: the routes anyone may call without logging in.
-- `scripts/check-routes.mjs`: the safety check, run by `npm run build`.
+- `scripts/check-routes.mjs`: the safety check, run by `npm run build` (and by the Dozokit Apps builder before Save).
+- `scripts/preview-db.mjs`: in Cloudflare's build of the `draft` branch, gives the preview its own database.
 
 ## Run it
 

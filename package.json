@@ -2,7 +2,7 @@
   "name": "dozokit-app",
   "scripts": {
     "check": "node scripts/check-routes.mjs",
-    "build": "node scripts/check-routes.mjs && tsc && vite build",
+    "build": "node scripts/check-routes.mjs && tsc && vite build && node scripts/preview-db.mjs",
     "db:migrate": "wrangler d1 migrations apply DB --local",
     "dev": "npm run build && npm run db:migrate && wrangler dev",
     "deploy": "wrangler d1 migrations apply DB --remote && wrangler deploy"

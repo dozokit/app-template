@@ -6,3 +6,4 @@ dist
 PLAN.md
 QA.md
 qa/
+.preview-migrations.json
