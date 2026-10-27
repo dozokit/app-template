@@ -28,8 +28,10 @@ a { color: var(--link); }
   border-bottom: var(--border) solid var(--line);
   background: var(--surface);
 }
-.ui-top-name { font: var(--head-weight) 1.05rem/1.2 var(--font-head); letter-spacing: var(--head-tracking); margin-right: auto; }
+.ui-top-name { font: var(--head-weight) 1.05rem/1.2 var(--font-head); letter-spacing: var(--head-tracking); margin-right: auto; white-space: nowrap; flex-shrink: 0; }
+/* A long email shrinks to "name@exa…" so the bar stays on one line on phones. */
 .ui-top-user { color: var(--muted); font-size: 0.9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.ui-top .ui-button { flex-shrink: 0; white-space: nowrap; }
 .ui-main { max-width: 36rem; margin: 0 auto; padding: calc(var(--space) * 2) var(--space) calc(var(--space) * 4); }
 
 .ui-card {
@@ -45,7 +47,7 @@ a { color: var(--link); }
   font: 500 1rem/1 var(--font-body);
   min-height: 2.75rem;
   padding: 0 calc(var(--space) * 1.1);
-  border-radius: var(--radius-small);
+  border-radius: var(--radius-control);
   border: var(--border) solid var(--accent);
   background: var(--accent);
   color: var(--accent-ink);
@@ -65,7 +67,7 @@ a { color: var(--link); }
   min-height: 2.75rem;
   padding: 0 calc(var(--space) * 0.75);
   border: var(--border) solid var(--line);
-  border-radius: var(--radius-small);
+  border-radius: var(--radius-control);
   background: var(--surface);
   color: var(--ink);
   width: 100%;
@@ -83,6 +85,6 @@ a { color: var(--link); }
 .ui-table td + td, .ui-table th + th { padding-left: var(--space); }
 
 .ui-empty { color: var(--muted); padding: calc(var(--space) * 1.5) 0; border-top: var(--border) dashed var(--line); margin-top: var(--space); }
-.ui-note { background: var(--soft); border-radius: var(--radius-small); padding: calc(var(--space) * 0.6) calc(var(--space) * 0.8); font-size: 0.95rem; }
+.ui-note { background: var(--soft); border-radius: var(--radius-box); padding: calc(var(--space) * 0.6) calc(var(--space) * 0.8); font-size: 0.95rem; }
 .ui-loading { color: var(--muted); padding: calc(var(--space) * 3) var(--space); text-align: center; }
 .ui-muted { color: var(--muted); }

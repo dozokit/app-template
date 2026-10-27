@@ -1,4 +1,6 @@
 import { betterAuth } from "better-auth";
+import { createHash } from "node:crypto";
+import previewOwner from "../preview-owner.json";
 import { sendEmail } from "./email";
 import type { Env } from "./env";
 
@@ -32,5 +34,8 @@ export async function requireUser(req: Request, env: Env) {
 
 // The app's owner (admin views): the account with OWNER_EMAIL, once that email is confirmed, so
 // nobody else can claim the address by signing up with it first.
+// On a draft preview only (PREVIEW is never set live), the Dozokit Apps builder's throwaway owner
+// counts too: its email is random, and only its hash is in preview-owner.json.
 export const isOwner = (user: { email: string; emailVerified: boolean }, env: Env) =>
-  Boolean(env.OWNER_EMAIL && user.emailVerified && user.email.toLowerCase() === env.OWNER_EMAIL.trim().toLowerCase());
+  Boolean(env.OWNER_EMAIL && user.emailVerified && user.email.toLowerCase() === env.OWNER_EMAIL.trim().toLowerCase()) ||
+  Boolean(env.PREVIEW === "1" && previewOwner.sha256 && createHash("sha256").update(user.email).digest("hex") === previewOwner.sha256);

@@ -21,7 +21,8 @@
 
   --space: 1rem;
   --radius: 10px;
-  --radius-small: 6px;
+  --radius-control: 6px;
+  --radius-box: 8px;
   --border: 1px;
   --shadow: none;
 }

@@ -5,11 +5,13 @@ A React + Vite app on Cloudflare Workers, with a D1 database and Better Auth log
 ## Layout
 
 - `src/`: the React app (served as static assets).
-- `src/theme.css`: the whole look (colours, fonts, spacing, corners, shadows). `src/ui/`: the building blocks (Page, Card, Button, Field, Table, Empty, ErrorMessage, Note, Loading, Row).
+- `src/theme.css`: the whole look (colours, fonts, spacing, corners, shadows). `src/themes/`: the 4 built-in looks (clean, warm, bold, dark); to switch to one, copy its file over `src/theme.css`. `src/ui/`: the building blocks (Page, Card, Button, Field, Table, Empty, ErrorMessage, Note, Loading, Row).
 - `worker/index.ts`: sends `/api/auth/*` to Better Auth and every other `/api/*` call to `worker/routes.ts`.
-- `worker/routes.ts`: every API route, keyed `"METHOD /path"`.
+- `worker/routes.ts`: every API route, keyed `"METHOD /path"`, matched exactly: no path params (`/api/bookings/:id`); pass ids in `?query` or the JSON body.
 - `worker/auth.ts`: Better Auth setup and `requireUser()`.
-- `migrations/`: D1 migrations, applied in order.
+- `migrations/`: D1 migrations, applied in order. Leave `0002_items.sql` (the demo table) as it is: migrations only add.
+- The app's name: `<title>` in `index.html` and `APP` in `src/App.tsx`.
+- `preview-owner.json`: written by the Dozokit Apps builder for its owner previews; leave it.
 - `public-routes.json`: the routes anyone may call without logging in.
 - `scripts/check-routes.mjs`: the safety check, run by `npm run build` (and by the Dozokit Apps builder before Save).
 - `scripts/preview-db.mjs`: in Cloudflare's build of the `draft` branch, gives the preview its own database.

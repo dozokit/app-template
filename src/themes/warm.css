@@ -1,0 +1,28 @@
+/* The app's whole look, in one place: colours, fonts, spacing, corners, shadows.
+   Changing the look means editing only this file. Theme: Warm. */
+@import url("https://fonts.bunny.net/css?family=fraunces:600|work-sans:400,500&display=swap");
+
+:root {
+  --paper: #fbf3f1;
+  --surface: #fffaf8;
+  --ink: #2a1a1f;
+  --muted: #6e5258;
+  --line: #ecd8d6;
+  --accent: #8e1d3f;
+  --accent-ink: #ffffff;
+  --link: var(--accent);
+  --soft: #f6e1e4;
+  --error: #b42318;
+
+  --font-head: "Fraunces", Georgia, serif;
+  --font-body: "Work Sans", system-ui, sans-serif;
+  --head-weight: 600;
+  --head-tracking: -0.01em;
+
+  --space: 1rem;
+  --radius: 18px;
+  --radius-control: 999px;
+  --radius-box: 14px;
+  --border: 1px;
+  --shadow: 0 14px 32px -20px rgba(142, 29, 63, 0.45);
+}

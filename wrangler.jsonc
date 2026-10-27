@@ -16,6 +16,7 @@
   // Draft previews (any branch but main) get their own database, never the live one.
   // scripts/preview-db.mjs creates it in Cloudflare's build and fills in its id.
   "previews": {
+    "vars": { "PREVIEW": "1" },
     "d1_databases": [
       { "binding": "DB", "database_name": "dozokit-app-preview-db", "migrations_dir": "migrations" }
     ]

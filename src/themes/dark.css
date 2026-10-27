@@ -1,0 +1,29 @@
+/* The app's whole look, in one place: colours, fonts, spacing, corners, shadows.
+   Changing the look means editing only this file. Theme: Dark. */
+@import url("https://fonts.bunny.net/css?family=sora:600|ibm-plex-sans:400,500&display=swap");
+
+:root {
+  color-scheme: dark;
+  --paper: #10151f;
+  --surface: #171e2b;
+  --ink: #e7ebf3;
+  --muted: #9aa4b8;
+  --line: #2a3345;
+  --accent: #f0b429;
+  --accent-ink: #1a1203;
+  --link: var(--accent);
+  --soft: #232c3d;
+  --error: #ff8a80;
+
+  --font-head: "Sora", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, sans-serif;
+  --head-weight: 600;
+  --head-tracking: -0.01em;
+
+  --space: 1rem;
+  --radius: 12px;
+  --radius-control: 8px;
+  --radius-box: 10px;
+  --border: 1px;
+  --shadow: none;
+}

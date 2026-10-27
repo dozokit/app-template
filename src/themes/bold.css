@@ -1,0 +1,28 @@
+/* The app's whole look, in one place: colours, fonts, spacing, corners, shadows.
+   Changing the look means editing only this file. Theme: Bold. */
+@import url("https://fonts.bunny.net/css?family=archivo:400,500,800&display=swap");
+
+:root {
+  --paper: #ffffff;
+  --surface: #ffffff;
+  --ink: #000000;
+  --muted: #3d3d3d;
+  --line: #000000;
+  --accent: #ffd400;
+  --accent-ink: #000000;
+  --link: #000000;
+  --soft: #fff3b0;
+  --error: #c4001a;
+
+  --font-head: "Archivo", system-ui, sans-serif;
+  --font-body: "Archivo", system-ui, sans-serif;
+  --head-weight: 800;
+  --head-tracking: -0.03em;
+
+  --space: 1rem;
+  --radius: 0;
+  --radius-control: 0;
+  --radius-box: 0;
+  --border: 2px;
+  --shadow: 5px 5px 0 #000000;
+}
