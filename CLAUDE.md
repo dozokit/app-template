@@ -13,6 +13,8 @@ A React + Vite app on Cloudflare Workers, with a D1 database and Better Auth log
 - The app's name: `<title>` in `index.html` and `APP` in `src/App.tsx`.
 - `worker/errors.ts`: unhandled errors go to `error_log` (Claude reads them with the builder's `app_errors` tool). `worker/cron.ts`: the hourly cron (alerts to the owner, Sunday backup to R2), off until the builder turns it on: Cloudflare's free plan allows 5 crons per account.
 - `preview-owner.json`: written by the Dozokit Apps builder for its owner previews; leave it.
+- `seed.sql`: sample rows for draft previews (never live), loaded at each draft build: keep it realistic for every table, so previews and owner views show data. `preview` can sign in as its `…@preview.test` users.
+- Account page (`/account`): "Download my data" (`GET /api/account/export`: add every new table that has a `user_id`) and "Delete my account" (every table with a `user_id` declares `REFERENCES user(id) ON DELETE CASCADE`, so its rows go too).
 - `public-routes.json`: the routes anyone may call without logging in (30 calls a minute per visitor; sign-in calls: 5). A public form (contact, booking request) puts `<HumanCheck>` from `src/ui` on the page and calls `humanCheck(req, env)` from `worker/turnstile.ts` first in its route.
 - `scripts/check-routes.mjs`: the safety check, run by `npm run build` (and by the Dozokit Apps builder before Save).
 - `scripts/preview-db.mjs`: in Cloudflare's build of the `draft` branch, gives the preview its own database.

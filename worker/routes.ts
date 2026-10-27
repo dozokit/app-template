@@ -13,6 +13,22 @@ export const routes: Record<string, Handler> = {
     return Response.json({ email: user.email, owner: isOwner(user, env) });
   },
 
+  // Account page: everything this user has here, as JSON (add each new table that has a user_id).
+  "GET /api/account/export": async (req, env) => {
+    const user = await requireUser(req, env);
+    const { results: items } = await env.DB.prepare("SELECT id, text, created_at FROM item WHERE user_id = ? LIMIT 10000").bind(user.id).all();
+    return Response.json({ user: { email: user.email, name: user.name, created: user.createdAt }, items }, { headers: { "content-disposition": 'attachment; filename="my-data.json"' } });
+  },
+
+  // Deletes the account and, through ON DELETE CASCADE, every row that has its user_id.
+  "POST /api/account/delete": async (req, env) => {
+    const user = await requireUser(req, env);
+    const { email } = await req.json<{ email?: string }>();
+    if (email?.trim().toLowerCase() !== user.email.toLowerCase()) return Response.json({ error: "Type your email exactly to delete your account." }, { status: 400 });
+    await env.DB.prepare("DELETE FROM user WHERE id = ?").bind(user.id).run();
+    return Response.json({ ok: true });
+  },
+
   // 50 at a time, newest first; ?before=<id> for the next page.
   "GET /api/items": async (req, env) => {
     const user = await requireUser(req, env);

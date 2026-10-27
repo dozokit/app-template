@@ -8,7 +8,8 @@ type Item = { id: number; text: string; created_at: string };
 export function App() {
   const { data: session, isPending } = authClient.useSession();
   if (isPending) return <Loading />;
-  return session ? <Items email={session.user.email} /> : <SignIn />;
+  if (!session) return <SignIn />;
+  return location.pathname === "/account" ? <Account email={session.user.email} /> : <Items email={session.user.email} />;
 }
 
 // Sign in with a 6-digit code sent by email (the account is made the first time), or with Google.
@@ -127,6 +128,46 @@ function Items({ email }: { email: string }) {
           Show more
         </Button>
       )}
+    </Page>
+  );
+}
+
+// The user's own account: their data as a file, and deleting the account.
+function Account({ email }: { email: string }) {
+  const [typed, setTyped] = useState("");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  async function remove(e: FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    const res = await fetch("/api/account/delete", { method: "POST", body: JSON.stringify({ email: typed }) });
+    setBusy(false);
+    if (!res.ok) return setError(((await res.json()) as { error: string }).error);
+    await authClient.signOut();
+    location.href = "/";
+  }
+  return (
+    <Page app={APP} user={email} onLogout={() => authClient.signOut()}>
+      <h1>Your account</h1>
+      <Card>
+        <h2>Your data</h2>
+        <Hint>Everything you've saved here, as a file.</Hint>
+        <a href="/api/account/export" download>
+          Download my data
+        </a>
+      </Card>
+      <Card>
+        <h2>Delete my account</h2>
+        <Hint>This removes your account and everything you've saved here, for good.</Hint>
+        <form onSubmit={remove}>
+          <Field label={`Type ${email} to confirm`} name="confirm" value={typed} onChange={(e) => setTyped(e.target.value)} required />
+          <ErrorMessage>{error}</ErrorMessage>
+          <Button variant="danger" busy={busy} disabled={typed.trim().toLowerCase() !== email.toLowerCase()}>
+            Delete my account
+          </Button>
+        </form>
+      </Card>
+      <a href="/">Back</a>
     </Page>
   );
 }

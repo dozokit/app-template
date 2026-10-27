@@ -25,3 +25,5 @@ writeFileSync(
   JSON.stringify({ name: "preview-migrations", d1_databases: [{ binding: "DB", database_name: name, database_id: db.uuid, migrations_dir: "migrations" }] }),
 );
 console.log(run("d1 migrations apply DB --remote --config .preview-migrations.json"));
+// Sample rows (seed.sql), so previews aren't empty; drafts only.
+console.log(run("d1 execute DB --remote --config .preview-migrations.json --file seed.sql"));

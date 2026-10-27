@@ -8,7 +8,11 @@ export function Page({ app, user, onLogout, children }: { app: string; user?: st
     <>
       <header className="ui-top">
         <span className="ui-top-name">{app}</span>
-        {user && <span className="ui-top-user">{user}</span>}
+        {user && (
+          <a className="ui-top-user" href="/account">
+            {user}
+          </a>
+        )}
         {onLogout && (
           <Button variant="quiet" onClick={onLogout}>
             Log out
