@@ -1,102 +1,81 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { authClient } from "./auth-client";
-import { Button, Card, Empty, ErrorMessage, Field, LinkButton, Loading, Note, Page, Row, Table } from "./ui";
+import { Button, Card, Empty, ErrorMessage, Field, Hint, LinkButton, Loading, Note, Page, Row, Table } from "./ui";
 
 const APP = "My app";
 type Item = { id: number; text: string; created_at: string };
 
 export function App() {
   const { data: session, isPending } = authClient.useSession();
-  if (location.pathname === "/reset-password") return <ResetPassword />;
   if (isPending) return <Loading />;
-  return session ? <Items email={session.user.email} confirmed={session.user.emailVerified} /> : <AuthForm />;
+  return session ? <Items email={session.user.email} /> : <SignIn />;
 }
 
-function AuthForm() {
-  const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
+// Sign in with a 6-digit code sent by email (the account is made the first time), or with Google.
+function SignIn() {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [code, setCode] = useState("");
+  const [sent, setSent] = useState(false);
+  const [google, setGoogle] = useState(false);
   const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
+  const local = /^(localhost|127\.0\.0\.1|.*\.localhost)$/.test(location.hostname);
+
+  useEffect(() => {
+    fetch("/api/login-options").then((r) => r.json() as Promise<{ google: boolean }>).then((o) => setGoogle(o.google));
+  }, []);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
     setBusy(true);
     setError("");
-    const { error } =
-      mode === "signup"
-        ? await authClient.signUp.email({ email, password, name: email.split("@")[0] })
-        : mode === "login"
-          ? await authClient.signIn.email({ email, password })
-          : await authClient.requestPasswordReset({ email, redirectTo: "/reset-password" });
+    const { error } = sent
+      ? await authClient.signIn.emailOtp({ email, otp: code.trim() })
+      : await authClient.emailOtp.sendVerificationOtp({ email, type: "sign-in" });
     setBusy(false);
     if (error) return setError(error.message ?? "Something went wrong");
-    if (mode === "forgot") setNotice("If this email has an account, a reset link is on its way.");
+    if (!sent) setSent(true);
   }
 
   return (
     <Page app={APP}>
-      <h1>{mode === "signup" ? "Create an account" : mode === "login" ? "Log in" : "Reset your password"}</h1>
+      <h1>Sign in</h1>
       <Card>
+        {google && (
+          <>
+            <Button type="button" variant="quiet" onClick={() => authClient.signIn.social({ provider: "google", callbackURL: "/" })}>
+              Continue with Google
+            </Button>
+            <Hint>or with your email:</Hint>
+          </>
+        )}
         <form onSubmit={submit}>
-          <Field label="Email" type="email" name="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-          {mode !== "forgot" && (
-            <Field label="Password" type="password" name="password" autoComplete={mode === "signup" ? "new-password" : "current-password"}
-              placeholder="8 characters or more" value={password} minLength={8} onChange={(e) => setPassword(e.target.value)} required />
+          <Field label="Email" type="email" name="email" autoComplete="email" value={email} readOnly={sent}
+            onChange={(e) => setEmail(e.target.value)} required />
+          {sent && (
+            <>
+              <Note>
+                We sent a 6-digit code to {email}. It works for 5 minutes.
+                {local && " Running locally, it's in the terminal running the app, or, with Dozokit Apps, on this app's page in the builder."}
+              </Note>
+              <Field label="Code" name="code" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6}
+                value={code} onChange={(e) => setCode(e.target.value)} required autoFocus />
+            </>
           )}
           <ErrorMessage>{error}</ErrorMessage>
-          {notice && <Note>{notice}</Note>}
-          <Button busy={busy}>{mode === "signup" ? "Sign up" : mode === "login" ? "Log in" : "Send reset link"}</Button>
+          <Button busy={busy}>{sent ? "Sign in" : "Email me a code"}</Button>
         </form>
       </Card>
-      <Row>
-        {mode !== "login" && <LinkButton onClick={() => setMode("login")}>Log in</LinkButton>}
-        {mode !== "signup" && <LinkButton onClick={() => setMode("signup")}>Create an account</LinkButton>}
-        {mode !== "forgot" && <LinkButton onClick={() => setMode("forgot")}>Forgot password?</LinkButton>}
-      </Row>
-    </Page>
-  );
-}
-
-function ResetPassword() {
-  const token = new URLSearchParams(location.search).get("token") ?? "";
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [done, setDone] = useState(false);
-
-  async function submit(e: FormEvent) {
-    e.preventDefault();
-    setBusy(true);
-    const { error } = await authClient.resetPassword({ newPassword: password, token });
-    setBusy(false);
-    if (error) return setError(error.message ?? "This link no longer works");
-    setDone(true);
-  }
-
-  return (
-    <Page app={APP}>
-      <h1>Choose a new password</h1>
-      {done ? (
-        <Note>
-          Password changed. <a href="/">Log in</a>
-        </Note>
-      ) : (
-        <Card>
-          <form onSubmit={submit}>
-            <Field label="New password" type="password" name="password" autoComplete="new-password" placeholder="8 characters or more"
-              value={password} minLength={8} onChange={(e) => setPassword(e.target.value)} required />
-            <ErrorMessage>{error}</ErrorMessage>
-            <Button busy={busy}>Save password</Button>
-          </form>
-        </Card>
+      {sent && (
+        <Row>
+          <LinkButton onClick={() => (setSent(false), setCode(""))}>Use another email</LinkButton>
+        </Row>
       )}
     </Page>
   );
 }
 
-function Items({ email, confirmed }: { email: string; confirmed: boolean }) {
+function Items({ email }: { email: string }) {
   const [items, setItems] = useState<Item[] | null>(null);
   const [text, setText] = useState("");
   const [error, setError] = useState("");
@@ -120,12 +99,6 @@ function Items({ email, confirmed }: { email: string; confirmed: boolean }) {
 
   return (
     <Page app={APP} user={email} onLogout={() => authClient.signOut()}>
-      {!confirmed && (
-        <Note>
-          Check your email to confirm your address.
-          {/^(localhost|127\.0\.0\.1|.*\.localhost)$/.test(location.hostname) && " Running locally, the link is in the terminal running the app, or, with Dozokit Apps, on this app's page in the builder."}
-        </Note>
-      )}
       <h1>My items</h1>
       <form onSubmit={add}>
         <Row>

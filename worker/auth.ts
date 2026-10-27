@@ -1,4 +1,5 @@
 import { betterAuth } from "better-auth";
+import { emailOTP } from "better-auth/plugins";
 import { createHash } from "node:crypto";
 import previewOwner from "../preview-owner.json";
 import { sendEmail } from "./email";
@@ -10,24 +11,26 @@ export const createAuth = (env: Env, req: Request) =>
     baseURL: new URL(req.url).origin,
     database: env.DB,
     secret: env.BETTER_AUTH_SECRET,
-    emailAndPassword: {
-      enabled: true,
-      // Whoever signed up first with someone else's email is logged out when its owner resets the password.
-      revokeSessionsOnPasswordReset: true,
-      sendResetPassword: ({ user, url }) =>
-        sendEmail(env, user.email, "Reset your password", `Open this link to choose a new password: ${url}`),
-    },
-    // The builder's preview owner (below) starts confirmed: no "check your email" in owner previews.
-    databaseHooks: {
-      user: { create: { before: async (user) => ({ data: { ...user, emailVerified: user.emailVerified || isPreviewOwner(user.email, env) } }) } },
-    },
-    // A confirmed email is what makes the owner the owner (isOwner below).
-    emailVerification: {
-      sendOnSignUp: true,
-      sendVerificationEmail: ({ user, url }) =>
-        sendEmail(env, user.email, "Confirm your email", `Open this link to confirm your email: ${url}`),
-    },
+    // No passwords: hashing one costs more CPU than the free plan's 10 ms a request. People sign in
+    // with a code sent by email (the account is made on first use, its email confirmed), or Google.
+    session: { expiresIn: 30 * DAY, updateAge: DAY },
+    socialProviders: env.GOOGLE_CLIENT_ID ? { google: { clientId: env.GOOGLE_CLIENT_ID, clientSecret: env.GOOGLE_CLIENT_SECRET ?? "" } } : {},
+    plugins: [
+      emailOTP({
+        otpLength: 6,
+        expiresIn: 300,
+        generateOTP: ({ email }) => (env.PREVIEW === "1" && email.endsWith("@preview.test") ? previewCode(email) : undefined),
+        sendVerificationOTP: ({ email, otp }) => sendEmail(env, email, "Your sign-in code", `Your code: ${otp}\nIt works for 5 minutes.`),
+      }),
+    ],
   });
+
+const DAY = 24 * 3600;
+
+// On a draft preview only (PREVIEW is never set live), users the Dozokit Apps builder makes
+// (…@preview.test) sign in with a code derived from their address, so it can show logged-in pages
+// without an inbox. Real addresses get a random code by email, as live.
+const previewCode = (email: string) => String(parseInt(createHash("sha256").update(`dozokit-preview:${email}`).digest("hex").slice(0, 8), 16) % 1e6).padStart(6, "0");
 
 // Every route that touches the database calls this first (scripts/check-routes.mjs enforces it).
 export async function requireUser(req: Request, env: Env) {
@@ -36,8 +39,8 @@ export async function requireUser(req: Request, env: Env) {
   return session.user;
 }
 
-// The app's owner (admin views): the account with OWNER_EMAIL, once that email is confirmed, so
-// nobody else can claim the address by signing up with it first.
+// The app's owner (admin views): the account with OWNER_EMAIL. Signing in by code (or Google) proves
+// the address, so nobody else can claim it.
 // On a draft preview only (PREVIEW is never set live), the Dozokit Apps builder's throwaway owner
 // counts too: its email is random, and only its hash is in preview-owner.json.
 const isPreviewOwner = (email: string, env: Env) =>

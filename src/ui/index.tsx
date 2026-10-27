@@ -66,6 +66,7 @@ export function Table({ columns, rows }: { columns: string[]; rows: { key: strin
 
 export const Empty = ({ children }: { children: ReactNode }) => <p className="ui-empty">{children}</p>;
 export const ErrorMessage = ({ children }: { children: ReactNode }) => (children ? <p className="ui-error" role="alert">{children}</p> : null);
+export const Hint = ({ children }: { children: ReactNode }) => <p className="ui-muted">{children}</p>;
 export const Note = ({ children }: { children: ReactNode }) => <p className="ui-note">{children}</p>;
 export const Loading = () => <p className="ui-loading" aria-live="polite">Loading…</p>;
 export const Row = ({ children }: { children: ReactNode }) => <div className="ui-row">{children}</div>;

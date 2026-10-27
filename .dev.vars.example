@@ -1,7 +1,12 @@
 # Random string, at least 32 characters: openssl rand -base64 32
 BETTER_AUTH_SECRET=
-# Your email: its account becomes the app's owner once the email is confirmed.
+# Your email: whoever signs in with it (by code or Google) is the app's owner.
 OWNER_EMAIL=
-# Optional. Without it, emails (confirmation, password reset) are printed in the Worker log.
+# Optional: "Continue with Google". From Google Cloud → APIs & Services → Credentials → OAuth client (Web);
+# authorized redirect URI: <your app's address>/api/auth/callback/google
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+# Sign-in codes go through Resend (free: 100 a day; customers only get them once your domain is verified there).
+# Without it, emails are printed in the Worker log.
 RESEND_API_KEY=
 EMAIL_FROM=

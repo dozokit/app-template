@@ -5,6 +5,9 @@ type Handler = (req: Request, env: Env) => Promise<Response>;
 
 // Every API route is a key here: "METHOD /path". Public ones are listed in public-routes.json.
 export const routes: Record<string, Handler> = {
+  // What the login screen offers (no database: anyone may ask).
+  "GET /api/login-options": async (_req, env) => Response.json({ google: Boolean(env.GOOGLE_CLIENT_ID) }),
+
   "GET /api/me": async (req, env) => {
     const user = await requireUser(req, env);
     return Response.json({ email: user.email, owner: isOwner(user, env) });
