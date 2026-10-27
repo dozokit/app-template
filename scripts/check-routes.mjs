@@ -69,7 +69,8 @@ export function checkRoutes(files, publicRoutes) {
   const errors = [];
   const routes = new Set();
   for (const [file, src] of Object.entries(files)) {
-    if (/^(src\/.*\.(tsx?|css)|index\.html)$/.test(file) && file !== "src/theme.css") {
+    // Only apps with the design kit (src/theme.css): older apps keep their own styling.
+    if ("src/theme.css" in files && /^(src\/.*\.(tsx?|css)|index\.html)$/.test(file) && file !== "src/theme.css") {
       src.split("\n").forEach((text, i) => {
         const colour = text.match(/#[0-9a-fA-F]{3,8}\b|\b(?:rgba?|hsla?)\([^)]*\)/)?.[0];
         if (colour) errors.push(`${file}:${i + 1} uses ${colour} — use a theme colour from src/theme.css.`);
