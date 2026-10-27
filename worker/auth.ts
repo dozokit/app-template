@@ -5,10 +5,19 @@ import previewOwner from "../preview-owner.json";
 import { sendEmail } from "./email";
 import type { Env } from "./env";
 
-// baseURL: the address the request came to, so links in emails point back to this app.
-export const createAuth = (env: Env, req: Request) =>
+// baseURL: the address the request came to, so links in emails point back to this app. One
+// instance per address, kept while the Worker stays warm: building it costs more CPU than the
+// request itself.
+const instances = new Map<string, ReturnType<typeof build>>();
+export const createAuth = (env: Env, req: Request) => {
+  const origin = new URL(req.url).origin;
+  if (!instances.has(origin)) instances.set(origin, build(env, origin));
+  return instances.get(origin)!;
+};
+
+const build = (env: Env, origin: string) =>
   betterAuth({
-    baseURL: new URL(req.url).origin,
+    baseURL: origin,
     database: env.DB,
     secret: env.BETTER_AUTH_SECRET,
     // No passwords: hashing one costs more CPU than the free plan's 10 ms a request. People sign in
