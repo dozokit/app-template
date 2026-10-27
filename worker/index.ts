@@ -3,6 +3,7 @@ import type { Env } from "./env";
 import publicRoutes from "../public-routes.json";
 import { routes } from "./routes";
 import { humanCheck } from "./turnstile";
+import { logError } from "./errors";
 
 const tooMany = () => Response.json({ error: "Too many tries. Wait a minute, then try again." }, { status: 429 });
 
@@ -27,7 +28,8 @@ export default {
       return await handler(req, env);
     } catch (e) {
       if (e instanceof Response) return e;
-      throw e;
+      await logError(env, `${req.method} ${pathname}`, e);
+      return Response.json({ error: "Something went wrong on our side." }, { status: 500 });
     }
   },
 } satisfies ExportedHandler<Env>;
