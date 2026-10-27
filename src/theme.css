@@ -10,6 +10,7 @@
   --line: #d9dee7;
   --accent: #2b50c8;
   --accent-ink: #ffffff;
+  --link: var(--accent);
   --soft: #e8edfa;
   --error: #b42318;
 
