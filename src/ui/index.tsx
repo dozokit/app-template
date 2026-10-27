@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode } from "react";
+import { useEffect, useRef, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode } from "react";
 import "./ui.css";
 
 // The app's building blocks. Every screen is made of these; a missing one is added here first.
@@ -70,3 +70,24 @@ export const Hint = ({ children }: { children: ReactNode }) => <p className="ui-
 export const Note = ({ children }: { children: ReactNode }) => <p className="ui-note">{children}</p>;
 export const Loading = () => <p className="ui-loading" aria-live="polite">Loading…</p>;
 export const Row = ({ children }: { children: ReactNode }) => <div className="ui-row">{children}</div>;
+
+// Cloudflare Turnstile's "are you human?" box. Its token goes in the x-turnstile-token header of the
+// call it protects (the server checks it with humanCheck); each token works once.
+declare global {
+  interface Window { turnstile?: { render: (el: HTMLElement, o: object) => string; reset: (id: string) => void } }
+}
+export function HumanCheck({ siteKey, onToken, reset }: { siteKey: string; onToken: (token: string) => void; reset: number }) {
+  const box = useRef<HTMLDivElement>(null);
+  const id = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    const draw = () => box.current && !id.current && (id.current = window.turnstile!.render(box.current, { sitekey: siteKey, callback: onToken }));
+    if (window.turnstile) return void draw();
+    const s = document.createElement("script");
+    s.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+    s.async = true;
+    s.onload = draw;
+    document.head.appendChild(s);
+  }, [siteKey, onToken]);
+  useEffect(() => void (reset && id.current && window.turnstile?.reset(id.current)), [reset]);
+  return <div className="ui-human" ref={box} />;
+}

@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { authClient } from "./auth-client";
-import { Button, Card, Empty, ErrorMessage, Field, Hint, LinkButton, Loading, Note, Page, Row, Table } from "./ui";
+import { Button, Card, Empty, ErrorMessage, Field, Hint, HumanCheck, LinkButton, Loading, Note, Page, Row, Table } from "./ui";
 
 const APP = "My app";
 type Item = { id: number; text: string; created_at: string };
@@ -17,12 +17,15 @@ function SignIn() {
   const [code, setCode] = useState("");
   const [sent, setSent] = useState(false);
   const [google, setGoogle] = useState(false);
+  const [turnstile, setTurnstile] = useState<string | null>(null);
+  const [human, setHuman] = useState("");
+  const [tries, setTries] = useState(0);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const local = /^(localhost|127\.0\.0\.1|.*\.localhost)$/.test(location.hostname);
 
   useEffect(() => {
-    fetch("/api/login-options").then((r) => r.json() as Promise<{ google: boolean }>).then((o) => setGoogle(o.google));
+    fetch("/api/login-options").then((r) => r.json() as Promise<{ google: boolean; turnstile: string | null }>).then((o) => (setGoogle(o.google), setTurnstile(o.turnstile)));
   }, []);
 
   async function submit(e: FormEvent) {
@@ -31,8 +34,9 @@ function SignIn() {
     setError("");
     const { error } = sent
       ? await authClient.signIn.emailOtp({ email, otp: code.trim() })
-      : await authClient.emailOtp.sendVerificationOtp({ email, type: "sign-in" });
+      : await authClient.emailOtp.sendVerificationOtp({ email, type: "sign-in", fetchOptions: { headers: { "x-turnstile-token": human } } });
     setBusy(false);
+    setTries((n) => n + 1);
     if (error) return setError(error.message ?? "Something went wrong");
     if (!sent) setSent(true);
   }
@@ -62,8 +66,9 @@ function SignIn() {
                 value={code} onChange={(e) => setCode(e.target.value)} required autoFocus />
             </>
           )}
+          {turnstile && !sent && <HumanCheck siteKey={turnstile} onToken={setHuman} reset={tries} />}
           <ErrorMessage>{error}</ErrorMessage>
-          <Button busy={busy}>{sent ? "Sign in" : "Email me a code"}</Button>
+          <Button busy={busy} disabled={Boolean(turnstile && !sent && !human)}>{sent ? "Sign in" : "Email me a code"}</Button>
         </form>
       </Card>
       {sent && (

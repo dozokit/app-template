@@ -5,6 +5,10 @@ export interface Env {
   GOOGLE_CLIENT_ID?: string;
   GOOGLE_CLIENT_SECRET?: string;
   PREVIEW?: string;
+  TURNSTILE_SITE_KEY?: string;
+  TURNSTILE_SECRET_KEY?: string;
+  AUTH_LIMIT?: RateLimit;
+  PUBLIC_LIMIT?: RateLimit;
   RESEND_API_KEY?: string;
   EMAIL_FROM?: string;
 }

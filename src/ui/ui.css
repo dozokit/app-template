@@ -88,3 +88,4 @@ a { color: var(--link); }
 .ui-note { background: var(--soft); border-radius: var(--radius-box); padding: calc(var(--space) * 0.6) calc(var(--space) * 0.8); font-size: 0.95rem; }
 .ui-loading { color: var(--muted); padding: calc(var(--space) * 3) var(--space); text-align: center; }
 .ui-muted { color: var(--muted); }
+.ui-human { margin-bottom: var(--space); min-height: 65px; }

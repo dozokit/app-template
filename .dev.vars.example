@@ -8,5 +8,9 @@ GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 # Sign-in codes go through Resend (free: 100 a day; customers only get them once your domain is verified there).
 # Without it, emails are printed in the Worker log.
+# Optional: Turnstile on sign-in and public forms. Cloudflare → Turnstile → Add widget (your app's address).
+# Locally, Cloudflare's test keys always pass: 1x00000000000000000000AA and 1x0000000000000000000000000000000AA
+TURNSTILE_SITE_KEY=
+TURNSTILE_SECRET_KEY=
 RESEND_API_KEY=
 EMAIL_FROM=

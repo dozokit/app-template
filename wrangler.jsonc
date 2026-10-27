@@ -21,6 +21,12 @@
       { "binding": "DB", "database_name": "dozokit-app-preview-db", "migrations_dir": "migrations" }
     ]
   },
+  // Sign-in calls: 5 a minute per visitor; public routes: 30. namespace_id only has to be unique in your
+  // Cloudflare account: change it if another app there uses the same one.
+  "ratelimits": [
+    { "name": "AUTH_LIMIT", "namespace_id": "4101", "simple": { "limit": 5, "period": 60 } },
+    { "name": "PUBLIC_LIMIT", "namespace_id": "4102", "simple": { "limit": 30, "period": 60 } }
+  ],
   // Workers Logs: shows each request's CPU time in the dashboard.
   "observability": { "enabled": true }
 }
