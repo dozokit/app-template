@@ -13,7 +13,9 @@ export default {
     const key = `${host}:${req.headers.get("cf-connecting-ip") ?? "local"}`;
     if (pathname.startsWith("/api/auth/")) {
       if (req.method === "POST" && env.AUTH_LIMIT && !(await env.AUTH_LIMIT.limit({ key })).success) return tooMany();
-      if (pathname === "/api/auth/email-otp/send-verification-otp" && !(await humanCheck(req, env))) {
+      // On a draft preview, the builder's own users (…@preview.test) skip the check: no human there.
+      const builderUser = env.PREVIEW === "1" && String(((await req.clone().json().catch(() => ({}))) as { email?: string }).email).endsWith("@preview.test");
+      if (pathname === "/api/auth/email-otp/send-verification-otp" && !builderUser && !(await humanCheck(req, env))) {
         return Response.json({ error: "Confirm you're not a robot, then try again." }, { status: 403 });
       }
       return createAuth(env, req).handler(req);

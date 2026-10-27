@@ -29,7 +29,10 @@ const build = (env: Env, origin: string) =>
         otpLength: 6,
         expiresIn: 300,
         generateOTP: ({ email }) => (env.PREVIEW === "1" && email.endsWith("@preview.test") ? previewCode(email) : undefined),
-        sendVerificationOTP: ({ email, otp }) => sendEmail(env, email, "Your sign-in code", `Your code: ${otp}\nIt works for 5 minutes.`),
+        // The builder's preview users get no email: their code is derived from their address.
+        sendVerificationOTP: async ({ email, otp }) => {
+          if (!(env.PREVIEW === "1" && email.endsWith("@preview.test"))) await sendEmail(env, email, "Your sign-in code", `Your code: ${otp}\nIt works for 5 minutes.`);
+        },
       }),
     ],
   });
