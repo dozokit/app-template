@@ -2,8 +2,10 @@ import { betterAuth } from "better-auth";
 import { sendEmail } from "./email";
 import type { Env } from "./env";
 
-export const createAuth = (env: Env) =>
+// baseURL: the address the request came to, so links in emails point back to this app.
+export const createAuth = (env: Env, req: Request) =>
   betterAuth({
+    baseURL: new URL(req.url).origin,
     database: env.DB,
     secret: env.BETTER_AUTH_SECRET,
     emailAndPassword: {
@@ -23,7 +25,7 @@ export const createAuth = (env: Env) =>
 
 // Every route that touches the database calls this first (scripts/check-routes.mjs enforces it).
 export async function requireUser(req: Request, env: Env) {
-  const session = await createAuth(env).api.getSession({ headers: req.headers });
+  const session = await createAuth(env, req).api.getSession({ headers: req.headers });
   if (!session) throw Response.json({ error: "Not logged in" }, { status: 401 });
   return session.user;
 }

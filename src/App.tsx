@@ -7,7 +7,7 @@ export function App() {
   const { data: session, isPending } = authClient.useSession();
   if (location.pathname === "/reset-password") return <ResetPassword />;
   if (isPending) return <p className="muted">Loading…</p>;
-  return session ? <Items email={session.user.email} /> : <AuthForm />;
+  return session ? <Items email={session.user.email} confirmed={session.user.emailVerified} /> : <AuthForm />;
 }
 
 function AuthForm() {
@@ -82,7 +82,7 @@ function ResetPassword() {
   );
 }
 
-function Items({ email }: { email: string }) {
+function Items({ email, confirmed }: { email: string; confirmed: boolean }) {
   const [items, setItems] = useState<Item[]>([]);
   const [text, setText] = useState("");
   const [error, setError] = useState("");
@@ -107,6 +107,12 @@ function Items({ email }: { email: string }) {
         <span className="muted">Logged in as {email}</span>
         <button className="link" onClick={() => authClient.signOut()}>Log out</button>
       </p>
+      {!confirmed && (
+        <p className="muted">
+          Check your email to confirm your address.
+          {/^(localhost|127\.0\.0\.1|.*\.localhost)$/.test(location.hostname) && " Running locally, the email is printed in the Worker log."}
+        </p>
+      )}
       <h1>My items</h1>
       <form className="row" onSubmit={add}>
         <input placeholder="New item" value={text} onChange={(e) => setText(e.target.value)} />

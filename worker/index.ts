@@ -5,7 +5,7 @@ import { routes } from "./routes";
 export default {
   async fetch(req, env) {
     const { pathname } = new URL(req.url);
-    if (pathname.startsWith("/api/auth/")) return createAuth(env).handler(req);
+    if (pathname.startsWith("/api/auth/")) return createAuth(env, req).handler(req);
     const handler = routes[`${req.method} ${pathname}`];
     if (!handler) return Response.json({ error: "Not found" }, { status: 404 });
     try {
