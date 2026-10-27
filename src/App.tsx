@@ -1,12 +1,14 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { authClient } from "./auth-client";
+import { Button, Card, Empty, ErrorMessage, Field, LinkButton, Loading, Note, Page, Row, Table } from "./ui";
 
+const APP = "My app";
 type Item = { id: number; text: string; created_at: string };
 
 export function App() {
   const { data: session, isPending } = authClient.useSession();
   if (location.pathname === "/reset-password") return <ResetPassword />;
-  if (isPending) return <p className="muted">Loading…</p>;
+  if (isPending) return <Loading />;
   return session ? <Items email={session.user.email} confirmed={session.user.emailVerified} /> : <AuthForm />;
 }
 
@@ -34,24 +36,26 @@ function AuthForm() {
   }
 
   return (
-    <main>
+    <Page app={APP}>
       <h1>{mode === "signup" ? "Create an account" : mode === "login" ? "Log in" : "Reset your password"}</h1>
-      <form onSubmit={submit}>
-        <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-        {mode !== "forgot" && (
-          <input type="password" placeholder="Password (8+ characters)" value={password} minLength={8}
-            onChange={(e) => setPassword(e.target.value)} required />
-        )}
-        <button disabled={busy}>{mode === "signup" ? "Sign up" : mode === "login" ? "Log in" : "Send reset link"}</button>
-        {error && <p className="error">{error}</p>}
-        {notice && <p className="muted">{notice}</p>}
-      </form>
-      <p className="row">
-        {mode !== "login" && <button className="link" onClick={() => setMode("login")}>Log in</button>}
-        {mode !== "signup" && <button className="link" onClick={() => setMode("signup")}>Create an account</button>}
-        {mode !== "forgot" && <button className="link" onClick={() => setMode("forgot")}>Forgot password?</button>}
-      </p>
-    </main>
+      <Card>
+        <form onSubmit={submit}>
+          <Field label="Email" type="email" name="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          {mode !== "forgot" && (
+            <Field label="Password" type="password" name="password" autoComplete={mode === "signup" ? "new-password" : "current-password"}
+              placeholder="8 characters or more" value={password} minLength={8} onChange={(e) => setPassword(e.target.value)} required />
+          )}
+          <ErrorMessage>{error}</ErrorMessage>
+          {notice && <Note>{notice}</Note>}
+          <Button busy={busy}>{mode === "signup" ? "Sign up" : mode === "login" ? "Log in" : "Send reset link"}</Button>
+        </form>
+      </Card>
+      <Row>
+        {mode !== "login" && <LinkButton onClick={() => setMode("login")}>Log in</LinkButton>}
+        {mode !== "signup" && <LinkButton onClick={() => setMode("signup")}>Create an account</LinkButton>}
+        {mode !== "forgot" && <LinkButton onClick={() => setMode("forgot")}>Forgot password?</LinkButton>}
+      </Row>
+    </Page>
   );
 }
 
@@ -59,33 +63,44 @@ function ResetPassword() {
   const token = new URLSearchParams(location.search).get("token") ?? "";
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
+    setBusy(true);
     const { error } = await authClient.resetPassword({ newPassword: password, token });
+    setBusy(false);
     if (error) return setError(error.message ?? "This link no longer works");
     setDone(true);
   }
 
-  if (done) return <p>Password changed. <a href="/">Log in</a></p>;
   return (
-    <main>
+    <Page app={APP}>
       <h1>Choose a new password</h1>
-      <form onSubmit={submit}>
-        <input type="password" placeholder="New password (8+ characters)" value={password} minLength={8}
-          onChange={(e) => setPassword(e.target.value)} required />
-        <button>Save password</button>
-        {error && <p className="error">{error}</p>}
-      </form>
-    </main>
+      {done ? (
+        <Note>
+          Password changed. <a href="/">Log in</a>
+        </Note>
+      ) : (
+        <Card>
+          <form onSubmit={submit}>
+            <Field label="New password" type="password" name="password" autoComplete="new-password" placeholder="8 characters or more"
+              value={password} minLength={8} onChange={(e) => setPassword(e.target.value)} required />
+            <ErrorMessage>{error}</ErrorMessage>
+            <Button busy={busy}>Save password</Button>
+          </form>
+        </Card>
+      )}
+    </Page>
   );
 }
 
 function Items({ email, confirmed }: { email: string; confirmed: boolean }) {
-  const [items, setItems] = useState<Item[]>([]);
+  const [items, setItems] = useState<Item[] | null>(null);
   const [text, setText] = useState("");
   const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     fetch("/api/items").then((r) => r.json() as Promise<Item[]>).then(setItems);
@@ -93,33 +108,38 @@ function Items({ email, confirmed }: { email: string; confirmed: boolean }) {
 
   async function add(e: FormEvent) {
     e.preventDefault();
+    setBusy(true);
     const res = await fetch("/api/items", { method: "POST", body: JSON.stringify({ text }) });
     const body = (await res.json()) as Item & { error: string };
+    setBusy(false);
     if (!res.ok) return setError(body.error);
-    setItems([body, ...items]);
+    setItems([body, ...(items ?? [])]);
     setText("");
     setError("");
   }
 
   return (
-    <main>
-      <p className="row">
-        <span className="muted">Logged in as {email}</span>
-        <button className="link" onClick={() => authClient.signOut()}>Log out</button>
-      </p>
+    <Page app={APP} user={email} onLogout={() => authClient.signOut()}>
       {!confirmed && (
-        <p className="muted">
+        <Note>
           Check your email to confirm your address.
           {/^(localhost|127\.0\.0\.1|.*\.localhost)$/.test(location.hostname) && " Running locally, the email is printed in the Worker log."}
-        </p>
+        </Note>
       )}
       <h1>My items</h1>
-      <form className="row" onSubmit={add}>
-        <input placeholder="New item" value={text} onChange={(e) => setText(e.target.value)} />
-        <button>Add</button>
+      <form onSubmit={add}>
+        <Row>
+          <Field label="New item" name="text" value={text} onChange={(e) => setText(e.target.value)} error={error || undefined} />
+          <Button busy={busy}>Add</Button>
+        </Row>
       </form>
-      {error && <p className="error">{error}</p>}
-      {items.length === 0 ? <p className="muted">No items yet.</p> : <ul>{items.map((i) => <li key={i.id}>{i.text}</li>)}</ul>}
-    </main>
+      {items === null ? (
+        <Loading />
+      ) : items.length === 0 ? (
+        <Empty>No items yet. Add your first one above.</Empty>
+      ) : (
+        <Table columns={["Item", "Added"]} rows={items.map((i) => ({ key: i.id, cells: [i.text, new Date(`${i.created_at}Z`).toLocaleDateString()] }))} />
+      )}
+    </Page>
   );
 }

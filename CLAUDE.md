@@ -5,6 +5,7 @@ A React + Vite app on Cloudflare Workers, with a D1 database and Better Auth log
 ## Layout
 
 - `src/`: the React app (served as static assets).
+- `src/theme.css`: the whole look (colours, fonts, spacing, corners, shadows). `src/ui/`: the building blocks (Page, Card, Button, Field, Table, Empty, ErrorMessage, Note, Loading, Row).
 - `worker/index.ts`: sends `/api/auth/*` to Better Auth and every other `/api/*` call to `worker/routes.ts`.
 - `worker/routes.ts`: every API route, keyed `"METHOD /path"`.
 - `worker/auth.ts`: Better Auth setup and `requireUser()`.
@@ -28,4 +29,5 @@ npm run dev                      # check + build + local migrations + wrangler d
 3. **Migrations only add.** New file `migrations/NNNN_name.sql` with `CREATE TABLE`, `ALTER TABLE … ADD COLUMN` or `CREATE INDEX`. Never edit an applied migration, never `DROP` or rename a table or column, never delete rows in a migration.
 4. **Secrets stay out of the repo.** Locally in `.dev.vars`; online as Worker secrets. A new secret gets a line in `.dev.vars.example`.
 5. **Emails** (sign-up confirmation, password reset) go through Resend when `RESEND_API_KEY` is set; without it they're printed in the Worker log, so locally the links are there.
-6. **Prove changes by running the app** (`npm run dev`, then use it in a browser), not with unit tests.
+6. **Every screen is built from `src/ui`.** No inline `style=`, no colours or fonts outside `src/theme.css` (`npm run build` fails on `#abc`, `rgb(…)`, `hsl(…)` or `style=` anywhere else). A block that's missing is added to `src/ui` first (its layout in `src/ui/ui.css`, using the theme's variables), then used. "Change the look" means editing `src/theme.css` only.
+7. **Prove changes by running the app** (`npm run dev`, then use it in a browser), not with unit tests.

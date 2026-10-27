@@ -1,0 +1,26 @@
+/* The app's whole look, in one place: colours, fonts, spacing, corners, shadows.
+   Changing the look means editing only this file. Theme: Clean. */
+@import url("https://fonts.bunny.net/css?family=public-sans:400,500,700&display=swap");
+
+:root {
+  --paper: #f4f6f9;
+  --surface: #ffffff;
+  --ink: #141a24;
+  --muted: #586174;
+  --line: #d9dee7;
+  --accent: #2b50c8;
+  --accent-ink: #ffffff;
+  --soft: #e8edfa;
+  --error: #b42318;
+
+  --font-head: "Public Sans", system-ui, sans-serif;
+  --font-body: "Public Sans", system-ui, sans-serif;
+  --head-weight: 700;
+  --head-tracking: -0.02em;
+
+  --space: 1rem;
+  --radius: 10px;
+  --radius-small: 6px;
+  --border: 1px;
+  --shadow: none;
+}
