@@ -11,6 +11,7 @@ A React + Vite app on Cloudflare Workers, with a D1 database and Better Auth log
 - `worker/auth.ts`: Better Auth setup and `requireUser()`.
 - `migrations/`: D1 migrations, applied in order. Leave `0002_items.sql` (the demo table) as it is: migrations only add.
 - The app's name: `<title>` in `index.html` and `APP` in `src/App.tsx`.
+- `worker/errors.ts`: unhandled errors go to `error_log` (Claude reads them with the builder's `app_errors` tool). `worker/cron.ts`: the hourly cron (alerts to the owner, Sunday backup to R2), off until the builder turns it on: Cloudflare's free plan allows 5 crons per account.
 - `preview-owner.json`: written by the Dozokit Apps builder for its owner previews; leave it.
 - `public-routes.json`: the routes anyone may call without logging in (30 calls a minute per visitor; sign-in calls: 5). A public form (contact, booking request) puts `<HumanCheck>` from `src/ui` on the page and calls `humanCheck(req, env)` from `worker/turnstile.ts` first in its route.
 - `scripts/check-routes.mjs`: the safety check, run by `npm run build` (and by the Dozokit Apps builder before Save).
