@@ -81,9 +81,13 @@ function Items({ email }: { email: string }) {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
-  useEffect(() => {
-    fetch("/api/items").then((r) => r.json() as Promise<Item[]>).then(setItems);
-  }, []);
+  const [more, setMore] = useState(false);
+  const page = (before?: number) =>
+    fetch(`/api/items${before ? `?before=${before}` : ""}`).then((r) => r.json() as Promise<Item[]>).then((next) => {
+      setItems((items) => [...(before ? (items ?? []) : []), ...next]);
+      setMore(next.length === 50);
+    });
+  useEffect(() => void page(), []);
 
   async function add(e: FormEvent) {
     e.preventDefault();
@@ -112,6 +116,11 @@ function Items({ email }: { email: string }) {
         <Empty>No items yet. Add your first one above.</Empty>
       ) : (
         <Table columns={["Item", "Added"]} rows={items.map((i) => ({ key: i.id, cells: [i.text, new Date(`${i.created_at}Z`).toLocaleDateString()] }))} />
+      )}
+      {more && items && (
+        <Button variant="quiet" onClick={() => page(items[items.length - 1].id)}>
+          Show more
+        </Button>
       )}
     </Page>
   );

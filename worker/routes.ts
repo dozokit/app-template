@@ -13,11 +13,13 @@ export const routes: Record<string, Handler> = {
     return Response.json({ email: user.email, owner: isOwner(user, env) });
   },
 
+  // 50 at a time, newest first; ?before=<id> for the next page.
   "GET /api/items": async (req, env) => {
     const user = await requireUser(req, env);
+    const before = Number(new URL(req.url).searchParams.get("before")) || Number.MAX_SAFE_INTEGER;
     const { results } = await env.DB.prepare(
-      "SELECT id, text, created_at FROM item WHERE user_id = ? ORDER BY id DESC",
-    ).bind(user.id).all();
+      "SELECT id, text, created_at FROM item WHERE user_id = ? AND id < ? ORDER BY id DESC LIMIT 50",
+    ).bind(user.id, before).all();
     return Response.json(results);
   },
 
