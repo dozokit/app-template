@@ -17,6 +17,10 @@ export const createAuth = (env: Env, req: Request) =>
       sendResetPassword: ({ user, url }) =>
         sendEmail(env, user.email, "Reset your password", `Open this link to choose a new password: ${url}`),
     },
+    // The builder's preview owner (below) starts confirmed: no "check your email" in owner previews.
+    databaseHooks: {
+      user: { create: { before: async (user) => ({ data: { ...user, emailVerified: user.emailVerified || isPreviewOwner(user.email, env) } }) } },
+    },
     // A confirmed email is what makes the owner the owner (isOwner below).
     emailVerification: {
       sendOnSignUp: true,
@@ -36,6 +40,8 @@ export async function requireUser(req: Request, env: Env) {
 // nobody else can claim the address by signing up with it first.
 // On a draft preview only (PREVIEW is never set live), the Dozokit Apps builder's throwaway owner
 // counts too: its email is random, and only its hash is in preview-owner.json.
+const isPreviewOwner = (email: string, env: Env) =>
+  Boolean(env.PREVIEW === "1" && previewOwner.sha256 && createHash("sha256").update(email).digest("hex") === previewOwner.sha256);
+
 export const isOwner = (user: { email: string; emailVerified: boolean }, env: Env) =>
-  Boolean(env.OWNER_EMAIL && user.emailVerified && user.email.toLowerCase() === env.OWNER_EMAIL.trim().toLowerCase()) ||
-  Boolean(env.PREVIEW === "1" && previewOwner.sha256 && createHash("sha256").update(user.email).digest("hex") === previewOwner.sha256);
+  Boolean(env.OWNER_EMAIL && user.emailVerified && user.email.toLowerCase() === env.OWNER_EMAIL.trim().toLowerCase()) || isPreviewOwner(user.email, env);

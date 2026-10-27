@@ -123,7 +123,7 @@ function Items({ email, confirmed }: { email: string; confirmed: boolean }) {
       {!confirmed && (
         <Note>
           Check your email to confirm your address.
-          {/^(localhost|127\.0\.0\.1|.*\.localhost)$/.test(location.hostname) && " Running locally, the email is printed in the Worker log."}
+          {/^(localhost|127\.0\.0\.1|.*\.localhost)$/.test(location.hostname) && " Running locally, the link is in the terminal running the app, or, with Dozokit Apps, on this app's page in the builder."}
         </Note>
       )}
       <h1>My items</h1>
